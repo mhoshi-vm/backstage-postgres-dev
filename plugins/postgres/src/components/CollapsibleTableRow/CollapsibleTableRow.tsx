@@ -4,7 +4,7 @@ import { StatusError, StatusOK, StatusPending, StatusRunning } from '@backstage/
 import { TableRow, TableCell } from '@material-ui/core';
 /* ignore lint error for internal dependencies */
 /* eslint-disable */
-import {Postgres, ServiceBinding} from '../../types';
+import {Postgres} from '../../types';
 
 /* eslint-enable */
 
@@ -38,7 +38,7 @@ function StatusComponent(props: { currentState: string; }): JSX.Element {
 
 
 
-export function CollapsibleTableRow(props: { clusterName: string, postgres: Postgres, serviceBinding: ServiceBinding }) {
+export function CollapsibleTableRow(props: { clusterName: string, postgres: Postgres }) {
   const { clusterName , postgres } = props;
 
   return (
@@ -68,12 +68,12 @@ export function CollapsibleTableRow(props: { clusterName: string, postgres: Post
               <TableCell><StatusComponent currentState={postgres.status.currentState} />Pending</TableCell>
           )}
           <TableCell component="th" scope="row">
-            {
-
-            }
+            {postgres.serviceBinding}
           </TableCell>
           <TableCell component="th" scope="row">
-
+            { postgres.wavefrontUri !== undefined && (
+                <a href={postgres.wavefrontUri}>Link</a>
+            )}
           </TableCell>
         </TableRow>
       </React.Fragment>

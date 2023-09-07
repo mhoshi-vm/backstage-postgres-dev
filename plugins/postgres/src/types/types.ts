@@ -1,13 +1,14 @@
 export interface Cluster {
   name: string;
   postgres: Postgres[];
-  servicebinding: ServiceBinding[];
   error: string;
 }
 
 export interface Postgres {
   apiVersion: string;
   kind: string;
+  serviceBinding: string;
+  wavefrontUri: string;
   metadata: {
     name: string;
     namespace: string;

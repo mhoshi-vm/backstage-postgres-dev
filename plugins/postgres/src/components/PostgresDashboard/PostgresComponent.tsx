@@ -1,5 +1,5 @@
 import {Entity} from '@backstage/catalog-model';
-import {Content, Page, Progress, ResponseErrorPanel,} from '@backstage/core-components';
+import {Content, Page, Progress, ResponseErrorPanel} from '@backstage/core-components';
 
 /* ignore lint error for internal dependencies */
 /* eslint-disable */
@@ -26,6 +26,8 @@ export const PostgresComponent = ({
   );
 
   const [loading, setLoading] = useState(true); // State to manage loading state
+
+
 
   useEffect(() => {
     // This useEffect will run whenever kubernetesObjects changes
@@ -63,7 +65,23 @@ export const PostgresComponent = ({
 
       // cast objects to PipelineRun
       cluster.postgres = flattenedPostgresAny as Postgres[];
-      cluster.servicebinding = flattenedServiceBindingAny as ServiceBinding[];
+
+      const serviceBinding = flattenedServiceBindingAny as ServiceBinding[];
+
+      for (let i=0 ; i < cluster.postgres.length ; i++){
+        for (let j = 0 ; j < serviceBinding.length; j++){
+          if (serviceBinding[j] != undefined
+              && cluster.postgres[i].metadata.namespace == serviceBinding[j].metadata.namespace
+              && serviceBinding[j].spec.service.kind == "Postgres"
+              && cluster.postgres[i].metadata.name == serviceBinding[j].spec.service.name){
+            cluster.postgres[i].serviceBinding = serviceBinding[j].spec.workload.name;
+            // Fix hardconding
+            const wavefrontUri = "https://vmware.wavefront.com/tracing/appmap#_v01(ams:(es:!t,ip:!f,is:!t,sl:DEFAULT),fs:!n,g:(c:(d:7200,s:1694041032,w:'2h'),d:7200,ls:!f,s:1694041032,w:'2h'),tf:!((filterType:Operation,id:3,value:!(!(CHANGEME.,'*')))))"
+            cluster.postgres[i].wavefrontUri = wavefrontUri.replace( "CHANGEME",  serviceBinding[j].spec.workload.name);
+          }
+        }
+
+      }
       clusters.push(cluster);
     }
   }
@@ -81,7 +99,7 @@ export const PostgresComponent = ({
                       <Grid container spacing={3} direction="column">
                         { cluster.postgres !== undefined && cluster.postgres !== null && cluster.postgres.length > 0 && (
                             <Grid item>
-                              <CollapsibleTable clusterName={cluster.name} postgres={cluster.postgres} serviceBinding={cluster.servicebinding} />
+                              <CollapsibleTable clusterName={cluster.name} postgres={cluster.postgres} />
                             </Grid>
                         )}
                         { cluster.error !== undefined && (
