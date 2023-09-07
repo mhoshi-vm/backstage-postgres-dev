@@ -3,7 +3,7 @@ import React from 'react';
 import { Table, TableContainer, TableBody, TableRow, TableCell, TableHead, TablePagination, TableFooter } from '@material-ui/core';
 /* ignore lint error for internal dependencies */
 /* eslint-disable */
-import {Postgres, ServiceBinding} from '../../types';
+import { Postgres } from '../../types';
 /* eslint-enable */
 import TablePaginationActions from '@material-ui/core/TablePagination/TablePaginationActions';
 import { CollapsibleTableRow } from '../CollapsibleTableRow';
@@ -11,10 +11,9 @@ import { CollapsibleTableRow } from '../CollapsibleTableRow';
 type PostgresProps = {
   clusterName?: string;
   postgres?: Postgres[];
-  serviceBinding?: ServiceBinding[];
 };
 
-export const CollapsibleTable = ({ clusterName, postgres, serviceBinding }: PostgresProps) => {
+export const CollapsibleTable = ({ clusterName, postgres }: PostgresProps) => {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   let emptyRows: number;
@@ -51,9 +50,9 @@ export const CollapsibleTable = ({ clusterName, postgres, serviceBinding }: Post
               <TableCell>Namespace</TableCell>
               <TableCell>DB</TableCell>
               <TableCell>Version</TableCell>
-              <TableCell>TableVersion</TableCell>
+              <TableCell>Size</TableCell>
               <TableCell>Status</TableCell>
-              <TableCell>Bind Apps</TableCell>
+              <TableCell>Bind Workload</TableCell>
               <TableCell>Monitoring Link</TableCell>
             </TableRow>
           </TableHead>
@@ -61,11 +60,9 @@ export const CollapsibleTable = ({ clusterName, postgres, serviceBinding }: Post
             {(postgres !== undefined) && (clusterName !== undefined) && (rowsPerPage > 0
                     ? postgres.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     : postgres
-            ).map((_postgres) => {
-              (serviceBinding ! = undefined) && (serviceBinding?.length >　0)
-              (<CollapsibleTableRow key={_postgres.metadata.name} clusterName={clusterName} postgres={_postgres} serviceBinding={serviceBinding}/>
-              )}
-            )}
+            ).map((_postgres) => (
+                <CollapsibleTableRow key={_postgres.metadata.name} clusterName={clusterName} postgres={_postgres}/>
+            ))}
 
             {emptyRows > 0 && (
                 <TableRow style={{ height: 53 * emptyRows }}>
