@@ -3,7 +3,7 @@ import React from 'react';
 import { Table, TableContainer, TableBody, TableRow, TableCell, TableHead, TablePagination, TableFooter } from '@material-ui/core';
 /* ignore lint error for internal dependencies */
 /* eslint-disable */
-import { Postgres } from '../../types';
+import {Postgres, ServiceBinding} from '../../types';
 /* eslint-enable */
 import TablePaginationActions from '@material-ui/core/TablePagination/TablePaginationActions';
 import { CollapsibleTableRow } from '../CollapsibleTableRow';
@@ -11,30 +11,31 @@ import { CollapsibleTableRow } from '../CollapsibleTableRow';
 type PostgresProps = {
   clusterName?: string;
   postgres?: Postgres[];
+  serviceBinding?: ServiceBinding[];
 };
 
-export const CollapsibleTable = ({ clusterName, postgres }: PostgresProps) => {
+export const CollapsibleTable = ({ clusterName, postgres, serviceBinding }: PostgresProps) => {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   let emptyRows: number;
   // Avoid a layout jump when reaching the last page with empty rows.
   if (postgres !== undefined) {
     emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - postgres.length) : 0;
+        page > 0 ? Math.max(0, (1 + page) * rowsPerPage - postgres.length) : 0;
   } else {
     emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage) : 0;
+        page > 0 ? Math.max(0, (1 + page) * rowsPerPage) : 0;
   }
 
   const handleChangePage = (
-    _event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number,
+      _event: React.MouseEvent<HTMLButtonElement> | null,
+      newPage: number,
   ) => {
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
@@ -50,45 +51,50 @@ export const CollapsibleTable = ({ clusterName, postgres }: PostgresProps) => {
               <TableCell>Namespace</TableCell>
               <TableCell>DB</TableCell>
               <TableCell>Version</TableCell>
+              <TableCell>TableVersion</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell>Bind Apps</TableCell>
+              <TableCell>Monitoring Link</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {(postgres !== undefined) && (clusterName !== undefined) && (rowsPerPage > 0
                     ? postgres.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     : postgres
-            ).map((_postgres) => (
-                <CollapsibleTableRow key={_postgres.metadata.name} clusterName={clusterName} postgres={_postgres} />
-            ))}
+            ).map((_postgres) => {
+              (serviceBinding ! = undefined) && (serviceBinding?.length >　0)
+              (<CollapsibleTableRow key={_postgres.metadata.name} clusterName={clusterName} postgres={_postgres} serviceBinding={serviceBinding}/>
+              )}
+            )}
+
             {emptyRows > 0 && (
                 <TableRow style={{ height: 53 * emptyRows }}>
                   <TableCell colSpan={7} />
                 </TableRow>
             )}
           </TableBody>
-        <TableFooter>
-          { postgres !== undefined && <TableRow>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-              colSpan={7}
-              count={postgres.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              SelectProps={{
-                inputProps: {
-                  'aria-label': 'rows per page',
-                },
-                native: true,
-              }}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              ActionsComponent={TablePaginationActions}
-            />
-          </TableRow>
-          }
-        </TableFooter>
-      </Table>
-    </TableContainer>
+          <TableFooter>
+            { postgres !== undefined && <TableRow>
+              <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+                  colSpan={7}
+                  count={postgres.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  SelectProps={{
+                    inputProps: {
+                      'aria-label': 'rows per page',
+                    },
+                    native: true,
+                  }}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  ActionsComponent={TablePaginationActions}
+              />
+            </TableRow>
+            }
+          </TableFooter>
+        </Table>
+      </TableContainer>
   );
 }
-
